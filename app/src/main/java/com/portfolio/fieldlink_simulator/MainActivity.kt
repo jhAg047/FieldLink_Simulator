@@ -182,7 +182,7 @@ private fun ResponsiveTwoPane(
     left: @Composable () -> Unit,
     right: @Composable () -> Unit
 ) {
-    BoxWithConstraints(Modifier.fillMaxSize()) {
+    /*BoxWithConstraints(Modifier.fillMaxSize()) {
         val isWide = maxWidth >= 900.dp
         if (isWide) {
             Row(
@@ -201,6 +201,13 @@ private fun ResponsiveTwoPane(
                 right()
             }
         }
+    }*/
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        Box(Modifier.weight(1f)) { left() }
+        Box(Modifier.weight(1f)) { right() }
     }
 }
 
@@ -271,7 +278,7 @@ private fun UserSelector(
                             .background(Color.White.copy(alpha = 0.12f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = user.avatar, fontSize = 22.sp)
+                        Text(text = user.avatar, fontSize = 5.sp)
                     }
 
                     Column(Modifier.weight(1f)) {
@@ -359,7 +366,7 @@ private fun PatternLoginPanel(
     ) {
         // Header
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(user.avatar, fontSize = 54.sp)
+            Text(user.avatar, fontSize = 10.sp)
             Spacer(Modifier.height(8.dp))
             Text(user.name, color = Color.White, style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
