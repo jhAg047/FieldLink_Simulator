@@ -1,6 +1,9 @@
 package com.portfolio.fieldlink_simulator
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -22,12 +25,16 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -61,8 +68,10 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.portfolio.fieldlink_simulator.ui.theme.FieldLink_SimulatorTheme
@@ -81,6 +90,14 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+
+@Preview(
+    device = "spec:width=411dp,height=891dp,dpi=420,isRound=false,chinSize=0dp,orientation=landscape,cutout=none,navigation=gesture"
+)
+@Composable
+fun PatterLoginPreview(){
+    PatternLoginView()
 }
 
 data class User(
@@ -158,8 +175,8 @@ fun PatternLoginView() {
                                 },
                                 onLoginSuccessShown = {
                                     // 성공 애니메이션 후 초기화
-                                    selectedUser = null
-                                    loginSuccess = false
+                                    /*selectedUser = null
+                                    loginSuccess = false*/
                                 },
                                 onTooShort = {
                                     // 최소 4점 안내
@@ -365,22 +382,36 @@ private fun PatternLoginPanel(
         verticalArrangement = Arrangement.Center
     ) {
         // Header
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(user.avatar, fontSize = 10.sp)
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.width(4.dp))
             Text(user.name, color = Color.White, style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.width(4.dp))
             Text("패턴을 그려주세요", color = Color.White.copy(alpha = 0.65f), fontSize = 13.sp)
         }
 
-        Spacer(Modifier.height(22.dp))
+        Spacer(Modifier.height(10.dp))
 
         if (loginSuccess) {
+            val context = LocalContext.current
+            val activity = context as? Activity
+
             LoginSuccessView(
                 onDone = {
                     onLoginSuccessShown()
                 }
             )
+
+            // 로그인 성공시 MapView 화면으로 이동
+            LaunchedEffect(loginSuccess) {
+                Log.e("Login","로그인 성공!")
+                delay(2000L) // 🎯 여기서 2초 대기
+                val intent = Intent(context, MapViewActivity::class.java)
+                context.startActivity(intent)
+                activity?.finish()
+            }
+
+
         } else {
             PatternGrid(
                 modifier = Modifier,
@@ -398,7 +429,7 @@ private fun PatternLoginPanel(
                         // 성공 애니메이션으로 전환은 상위 state(loginSuccess)에서 처리
                     } else {
                         scope.launch {
-                            snackbarHostState.showSnackbar("패턴이 일치하지 않습니다.")
+                            snackbarHostState.showSnackbar("패턴이 일치하지 않습니다. 입력패턴 : " + pattern)
                         }
                         onWrong()
                         // 틀렸을 때도 PatternGrid 내부에서 초기화됨
@@ -410,7 +441,7 @@ private fun PatternLoginPanel(
 }
 
 @Composable
-private fun LoginSuccessView(onDone: () -> Unit) {
+    private fun LoginSuccessView(onDone: () -> Unit) {
     val bounce = rememberInfiniteTransition(label = "bounce")
     val scale by bounce.animateFloat(
         initialValue = 1f,
@@ -455,18 +486,28 @@ private fun LoginSuccessView(onDone: () -> Unit) {
 }
 
 @Composable
+fun LoginSuccessHandler(
+    onNavigate: () -> Unit
+) {
+    LaunchedEffect(Unit) {
+        delay(1000L) // 1초 딜레이
+        onNavigate()
+    }
+}
+
+@Composable
 private fun PatternGrid(
     modifier: Modifier = Modifier,
     onPatternComplete: (List<Int>) -> Unit
 ) {
     val gridSize = 3
-    val dotRadius = 12.dp
+    val dotRadius = 10.dp
     val selectedDotRadius = 20.dp
 
     var pattern by remember { mutableStateOf(listOf<Int>()) }
     var isDrawing by remember { mutableStateOf(false) }
     var currentPos by remember { mutableStateOf<Offset?>(null) }
-    var canvasSize by remember { mutableStateOf(Size.Zero) }
+//    var canvasSize by remember { mutableStateOf(Size.Zero) }
 
     val density = LocalDensity.current
     val dotRadiusPx = with(density) { dotRadius.toPx() }
@@ -505,7 +546,7 @@ private fun PatternGrid(
         val canvasShape = RoundedCornerShape(18.dp)
         Box(
             modifier = Modifier
-                .size(320.dp)
+                .size(300.dp)
                 .clip(canvasShape)
                 .background(Color.White.copy(alpha = 0.06f))
                 .border(1.dp, Color.White.copy(alpha = 0.20f), canvasShape)
@@ -516,26 +557,31 @@ private fun PatternGrid(
                     .pointerInput(Unit) {
                         detectDragGestures(
                             onDragStart = { offset ->
-                                val size = this.size
-                                val idx = nearestDot(offset.x, offset.y, canvasSize)
+                                val s = this.size
+                                val canvas = Size(s.width.toFloat(), s.height.toFloat())
+                                val idx = nearestDot(offset.x, offset.y, canvas)
                                 if (idx != -1) {
                                     pattern = listOf(idx)
                                     isDrawing = true
                                     currentPos = offset
                                 }
+                                Log.e("Drag","드래그 시작")
                             },
                             onDrag = { change, _ ->
                                 if (!isDrawing) return@detectDragGestures
-                                val size = this.size
+                                val s = this.size
+                                val canvas = Size(s.width.toFloat(),s.height.toFloat())
                                 val pos = change.position
                                 currentPos = pos
 
-                                val idx = nearestDot(pos.x, pos.y, canvasSize)
+                                val idx = nearestDot(pos.x, pos.y, canvas)
                                 if (idx != -1 && !pattern.contains(idx)) {
                                     pattern = pattern + idx
                                 }
+                                Log.e("Drag","드래그 중")
                             },
                             onDragEnd = {
+                                Log.e("Drag","드래그 끝")
                                 val result = pattern
                                 // reset
                                 pattern = emptyList()
@@ -547,6 +593,7 @@ private fun PatternGrid(
                                 }
                             },
                             onDragCancel = {
+                                Log.e("Drag","드래그 취소")
                                 pattern = emptyList()
                                 isDrawing = false
                                 currentPos = null
