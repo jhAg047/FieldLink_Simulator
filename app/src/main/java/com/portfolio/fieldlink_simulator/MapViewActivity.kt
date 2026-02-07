@@ -2,6 +2,7 @@ package com.portfolio.fieldlink_simulator
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -37,6 +38,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.layout.offset
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.tooling.preview.Preview
 import com.portfolio.fieldlink_simulator.ui.theme.FieldLink_SimulatorTheme
 
@@ -53,7 +56,9 @@ class MapViewActivity : ComponentActivity() {
     }
 }
 @Composable
-@Preview
+@Preview(
+    device = "spec:width=411dp,height=891dp,dpi=420,isRound=false,chinSize=0dp,orientation=landscape,cutout=none,navigation=gesture"
+)
 fun MapViewPreview(){
     MapNavigatorScreen()
 }
@@ -124,6 +129,8 @@ private fun TopBar(
     query: String,
     onQueryChange: (String) -> Unit
 ) {
+    var isExit by remember { mutableStateOf(false) }
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = Color.White,
@@ -139,7 +146,7 @@ private fun TopBar(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // 타이틀 영역
-                Row(
+                /*Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -157,12 +164,83 @@ private fun TopBar(
                     )
                 }
 
-                // 검색바
-                Spacer(Modifier.width(22.dp))
-                SearchBar(
-                    query = query,
-                    onQueryChange = onQueryChange
-                )
+                Spacer(Modifier.width(22.dp))*/
+
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shadowElevation = 6.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        // 👤 사용자 이름
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "user",
+                                tint = Color(0xFF2563EB),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = "사용자",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF1E293B)
+                            )
+                        }
+
+                        Spacer(Modifier.width(20.dp))
+
+                        // 📍 현재 위치
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "location",
+                                tint = Color(0xFF16A34A),
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = "currentLocation",
+                                fontSize = 13.sp,
+                                color = Color(0xFF334155)
+                            )
+                        }
+
+                        Spacer(Modifier.weight(1f))
+
+                        // 🔋 배터리
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "battery",
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = "100%",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF334155)
+                            )
+                        }
+
+                        Spacer(Modifier.width(16.dp))
+                    }
+                }
+
             }
 
             // 유저 칩
