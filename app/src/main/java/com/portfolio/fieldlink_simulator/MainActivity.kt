@@ -107,6 +107,7 @@ data class User(
     val pattern: List<Int>
 )
 
+// 앱 최초 설치시 기본 사용자 DB 추가
 private val mockUsers = listOf(
     User(1, "김민수", "👨", listOf(0, 1, 2, 5, 8)),
     User(2, "이지은", "👩", listOf(0, 4, 8, 7, 6)),
@@ -174,9 +175,7 @@ fun PatternLoginView() {
                                     }
                                 },
                                 onLoginSuccessShown = {
-                                    // 성공 애니메이션 후 초기화
-                                    /*selectedUser = null
-                                    loginSuccess = false*/
+                                    // 사용자 정보 MapViewActivity에 전달
                                 },
                                 onTooShort = {
                                     // 최소 4점 안내
@@ -199,26 +198,6 @@ private fun ResponsiveTwoPane(
     left: @Composable () -> Unit,
     right: @Composable () -> Unit
 ) {
-    /*BoxWithConstraints(Modifier.fillMaxSize()) {
-        val isWide = maxWidth >= 900.dp
-        if (isWide) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                Box(Modifier.weight(1f)) { left() }
-                Box(Modifier.weight(1f)) { right() }
-            }
-        } else {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                left()
-                right()
-            }
-        }
-    }*/
     Row(
         modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.spacedBy(24.dp)

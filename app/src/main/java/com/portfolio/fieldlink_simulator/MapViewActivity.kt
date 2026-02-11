@@ -41,7 +41,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.viewinterop.AndroidView
 import com.portfolio.fieldlink_simulator.ui.theme.FieldLink_SimulatorTheme
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.views.MapView
 
 class MapViewActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,8 +96,11 @@ fun MapNavigatorScreen(
                     .fillMaxSize()
                     .padding(0.dp)
             ) {
-                // 지도 배경(가짜)
-                FakeMapBackground()
+/*                // 지도 배경(가짜)
+                FakeMapBackground()*/
+
+                // osmdroid 지도
+                OsmMap()
 
                 // 왼쪽 하단 컨트롤 버튼
                 MapControls(
@@ -543,4 +549,23 @@ private fun SlideMenu(
             }
         }
     }
+}
+
+@Composable
+private fun OsmMap(
+    modifier: Modifier = Modifier
+){
+    AndroidView(
+        factory = { context ->
+            MapView(context).apply {
+                setTileSource(TileSourceFactory.MAPNIK)
+                setBuiltInZoomControls(true)
+                controller.setZoom(15.0)
+            }
+        },
+        modifier = modifier.fillMaxSize(),
+        update = { mapView ->
+            // 업데이트 후 동작
+        }
+    )
 }
